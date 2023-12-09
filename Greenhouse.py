@@ -37,3 +37,37 @@ data.columns
 cols = ['ISO2', 'CTS_Full_Descriptor', 'CTS_Code', 'F1986', 'F1987', 'F1988', 'F1989', 'F1990', 'F1991', 'F1992', 'F1993', 'F1994', 'F1995', 'F1996', 'F1997', 'F1998', 'F1999', 'F2000']
 data = data.drop(cols, axis=1)
 
+#%%
+
+country_list = [
+    'United States', 'China, P.R.: Mainland', 'Japan', 'Germany', 'India',
+    'United Kingdom', 'France', 'Brazil', 'Italy', 'Canada', 'South Korea',
+    'Australia', 'Spain', 'Mexico', 'Indonesia', 'Netherlands, The',
+    'Saudi Arabia', 'Turkey', 'Switzerland', 'Taiwan Province of China',
+    'Sweden', 'Poland, Rep. of', 'Belgium', 'Thailand', 'Iran, Islamic Rep. of',
+    'Austria', 'Norway', 'United Arab Emirates', 'Nigeria', 'Israel',
+    'South Africa', 'Egypt, Arab Rep. of', 'Malaysia', 'Singapore',
+    'Hong Kong SAR, China', 'Ireland', 'Denmark', 'Philippines', 'Finland',
+    'Pakistan', 'Chile', 'Bangladesh', 'Vietnam', 'Greece', 'Colombia',
+    'Ukraine', 'Romania', 'Czech Rep.', 'Portugal', 'Peru', 'Iraq', 'Qatar',
+    'Algeria', 'Kuwait', 'Morocco', 'Hungary', 'Kazakhstan, Rep. of', 'Angola',
+    'Sri Lanka', 'Ethiopia, The Federal Dem. Rep. of', 'Dominican Rep.', 'Kenya',
+    'Oman', 'Venezuela, Rep. Bolivariana de', 'Luxembourg', 'Panama', 'Bulgaria',
+    'Croatia, Rep. of', 'Myanmar', 'Sudan', 'Belarus, Rep. of', 'Costa Rica',
+    'Uruguay', 'Tunisia', 'Uzbekistan, Rep. of', 'Slovakia, Rep. of',
+    'Azerbaijan, Rep. of', 'Lebanon', 'Tanzania, United Rep. of', 'Ecuador',
+    'Bolivia', 'Cameroon', 'Jordan', 'Bahrain, Kingdom of', 'Sri Lanka',
+    'Bulgaria', 'Nepal', 'Iceland', 'Trinidad and Tobago', 'Estonia, Rep. of',
+    'Slovenia, Rep. of', 'Paraguay', 'Cambodia', 'El Salvador', 'Latvia',
+    'Papua New Guinea', 'Mozambique, Rep. of', 'Zambia', 'Cyprus', 'Gabon','Argentina','Russian Federation','China, P.R.: Macao'
+]
+
+df_filtered = data[data['Country'].isin(country_list)]
+
+#%%
+df_filtered.to_csv('C:/Users/YASH/Documents/Intro-to-Data-Mining-Project/data.csv', index=False)
+
+#%%
+
+
+# %%
