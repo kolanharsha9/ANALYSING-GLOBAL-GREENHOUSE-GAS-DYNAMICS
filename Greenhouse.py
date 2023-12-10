@@ -65,6 +65,33 @@ country_list = [
 df_filtered = data[data['Country'].isin(country_list)]
 data1=df_filtered
 data2 = data1[data1['Industry'] != 'Not Applicable']
+# %%
+# Assuming your data is stored in a DataFrame named df
+# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
+# df = pd.read_csv('your_data.csv')
+
+industry_categories = {
+    'Agriculture': ['Agriculture'],
+    'Buildings and Infrastructure': ['Buildings and other Sectors', 'Domestic Aviation', 'Domestic Navigation', 'Road Transportation', 'Railways', 'Other Transportation'],
+    'Chemical and Manufacturing Industries': ['Chemical Industry', 'Industrial Processes and Product Use', 'Manufacturing Industries and Construction', 'Mineral Industry', 'Non-energy Products from Fuels and Solvent Use', 'Electronics Industry'],
+    'Energy': ['Energy', 'Energy Industries', 'Fugitive Emissions from Fuels'],
+    'Waste': ['Waste'],
+    'Other': ['Other', 'Other Product Manufacture and Use', 'Other (Not specified elsewhere)'],
+    'Metal Industry': ['Metal Industry']
+}
+
+# Function to map industries to categories
+def map_industry_to_category(industry):
+    for category, industries in industry_categories.items():
+        if industry in industries:
+            return category
+    return 'Uncategorized'
+
+# Add a new column 'Category' to the DataFrame
+data2['Industry_Category'] = data2['Industry'].apply(map_industry_to_category)
+
+# Print the updated DataFrame with the new 'Category' column
+print(data2)
 #%%
 data2.to_csv('data.csv', index=False)
 
@@ -80,10 +107,10 @@ import seaborn as sns
 
 
 # List of columns representing years
-year_columns = [f'F{year}' for year in range(2010, 2022)]
+year_columns = [f'F{year}' for year in range(2016, 2022)]
 
 # Summing up GHG emissions by industry over the years
-total_emissions_by_industry = df.groupby('Industry')[year_columns].sum().sum(axis=1)
+total_emissions_by_industry = df.groupby('Industry_Category')[year_columns].sum().sum(axis=1)
 
 # Sorting industries by their total emissions
 sorted_emissions = total_emissions_by_industry.sort_values(ascending=False)
@@ -91,7 +118,7 @@ sorted_emissions = total_emissions_by_industry.sort_values(ascending=False)
 # Plotting the results
 plt.figure(figsize=(12, 8))
 sns.barplot(x=sorted_emissions.values, y=sorted_emissions.index)
-plt.title('Total GHG Emissions by Industry (1970-2021)')
+plt.title('Total GHG Emissions by Industry (2016-2021)')
 plt.xlabel('Total Emissions (Million Metric Tons of CO2 Equivalent)')
 plt.ylabel('Industry')
 plt.show()
@@ -137,32 +164,7 @@ plt.legend(title='Country', bbox_to_anchor=(1, 1))
 # Show the plot
 plt.show()
 
-# %%
-# List of bottom 10 economy countries
-bottom_country_list = [
-    'Sri Lanka', 'Bulgaria', 'Nepal', 'Iceland', 'Trinidad and Tobago',
-    'Estonia, Rep. of', 'Slovenia, Rep. of', 'Paraguay', 'Cambodia', 'El Salvador'
-]
 
-# Filter the DataFrame to include only the bottom 10 economy countries
-df_bottom_ten = df[df['Country'].isin(bottom_country_list)]
-
-# Select relevant columns for analysis (e.g., 'Country', 'F2016' to 'F2021')
-df_bottom_selected = df_bottom_ten[columns_of_interest]
-
-# Group by 'Country' and calculate the mean emissions for each year
-df_bottom_mean = df_bottom_selected.groupby('Country').mean()
-
-# Plot the mean GHG emissions for each country from 2016 to 2021
-plt.figure(figsize=(12, 8))
-df_bottom_mean.T.plot(kind='line', marker='o')
-plt.title('Mean GHG Emissions from 2016 to 2021 - Bottom Ten Economy Countries')
-plt.xlabel('Year')
-plt.ylabel('Mean GHG Emissions (Million metric tons of CO2 equivalent)')
-plt.legend(title='Country', bbox_to_anchor=(1, 1))
-
-# Show the plot
-plt.show()
 
 
 # %%
@@ -175,11 +177,11 @@ import matplotlib.pyplot as plt
 emissions_df = df[df.iloc[:, 11:].notnull().any(axis=1)]
 
 # Count occurrences of each (Industry, Gas_Type) combination
-industry_gas_counts = emissions_df.groupby(['Industry', 'Gas_Type']).size().reset_index(name='Count')
+industry_gas_counts = emissions_df.groupby(['Industry_Category', 'Gas_Type']).size().reset_index(name='Count')
 
 # Plotting
 plt.figure(figsize=(14, 8))
-sns.barplot(x='Count', y='Industry', hue='Gas_Type', data=industry_gas_counts)
+sns.barplot(x='Count', y='Industry_Category', hue='Gas_Type', data=industry_gas_counts)
 plt.title('Gas Types by Industry')
 plt.xlabel('Count')
 plt.ylabel('Industry')
@@ -318,7 +320,7 @@ plt.show()
 
 #%%
 print(top_10_percent.index)
-
+print(bottom_10_percent.index)
 
 
 
@@ -355,6 +357,13 @@ else:
 
 
 # %%
+
+
+
+
+# %%
+df.columns
+# %%
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -364,26 +373,26 @@ import matplotlib.pyplot as plt
 # df = pd.read_csv('your_data.csv')
 
 # List of countries to focus on
-countries_of_interest = [
+countries_of_interest_top = [
     'China, P.R.: Mainland', 'United States', 'India', 'Russian Federation',
     'Japan', 'Indonesia', 'Iran, Islamic Rep. of', 'Brazil', 'Saudi Arabia'
 ]
 
 # Filter the DataFrame to include only the selected countries
-df_filtered = df[df['Country'].isin(countries_of_interest)]
+df_filtered = df[df['Country'].isin(countries_of_interest_top)]
 
 # Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Industry', etc.)
-columns_of_interest = ['Country', 'F2021', 'Industry']
+columns_of_interest = ['Country', 'F2021', 'Industry_Category']
 df_selected = df_filtered[columns_of_interest]
 
 # Group by Country and Industry, summing up emissions for each combination
-df_grouped = df_selected.groupby(['Country', 'Industry'])['F2021'].sum().reset_index()
+df_grouped = df_selected.groupby(['Country', 'Industry_Category'])['F2021'].sum().reset_index()
 
 # Set the plot size
 plt.figure(figsize=(14, 8))
 
 # Use seaborn to create a bar plot
-sns.barplot(x='Country', y='F2021', hue='Industry', data=df_grouped, palette='viridis')
+sns.barplot(x='Country', y='F2021', hue='Industry_Category', data=df_grouped, palette="tab10")
 
 # Add labels and title
 plt.title('Emissions by Industry in 2021 for Each Country')
@@ -392,37 +401,139 @@ plt.ylabel('Total Emissions')
 plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
 
 # Show legend
-plt.legend(title='Industry', bbox_to_anchor=(1, 1))
+plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
+
+# Show the plot
+plt.show()
+# %%
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Assuming your data is stored in a DataFrame named df
+# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
+# df = pd.read_csv('your_data.csv')
+
+# List of countries to focus on
+countries_of_interest_bottom = [
+    'Macao', 'Iceland', 'Cyprus', 'Luxembourg', 'Latvia',
+       'Estonia, Rep. of', 'El Salvador', 'Costa Rica', 'Papua New Guinea'
+]
+
+# Filter the DataFrame to include only the selected countries
+df_filtered = df[df['Country'].isin(countries_of_interest_bottom)]
+
+# Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Industry', etc.)
+columns_of_interest = ['Country', 'F2021', 'Industry_Category']
+df_selected = df_filtered[columns_of_interest]
+
+# Group by Country and Industry, summing up emissions for each combination
+df_grouped = df_selected.groupby(['Country', 'Industry_Category'])['F2021'].sum().reset_index()
+
+# Set the plot size
+plt.figure(figsize=(14, 8))
+
+# Use seaborn to create a bar plot
+sns.barplot(x='Country', y='F2021', hue='Industry_Category', data=df_grouped, palette="tab10")
+
+# Add labels and title
+plt.title('Emissions by Industry in 2021 for Each Country')
+plt.xlabel('Country')
+plt.ylabel('Total Emissions')
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+
+# Show legend
+plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
+
+# Show the plot
+plt.show()
+# %%
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Assuming your data is stored in a DataFrame named df
+# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
+# df = pd.read_csv('your_data.csv')
+
+# List of countries to focus on
+countries_of_interest_top = [
+    'China, P.R.: Mainland', 'United States', 'India', 'Russian Federation',
+    'Japan', 'Indonesia', 'Iran, Islamic Rep. of', 'Brazil', 'Saudi Arabia'
+]
+
+# Filter the DataFrame to include only the selected countries
+df_filtered = df[df['Country'].isin(countries_of_interest_top)]
+
+# Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Gas_Type', etc.)
+columns_of_interest = ['Country', 'F2021', 'Gas_Type']
+df_selected = df_filtered[columns_of_interest]
+
+# Group by Country and Gas_Type, summing up emissions for each combination
+df_grouped = df_selected.groupby(['Country', 'Gas_Type'])['F2021'].sum().reset_index()
+
+# Set the plot size
+plt.figure(figsize=(14, 8))
+
+# Use seaborn to create a bar plot
+sns.barplot(x='Country', y='F2021', hue='Gas_Type', data=df_grouped, palette="tab10")
+
+# Add labels and title
+plt.title('Emissions by Gas Type in 2021 for Each Country')
+plt.xlabel('Country')
+plt.ylabel('Total Emissions')
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+
+# Show legend
+plt.legend(title='Gas_Type', bbox_to_anchor=(1, 1))
 
 # Show the plot
 plt.show()
 
 # %%
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 # Assuming your data is stored in a DataFrame named df
 # Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
 # df = pd.read_csv('your_data.csv')
 
-industry_categories = {
-    'Agriculture': ['Agriculture'],
-    'Buildings and Infrastructure': ['Buildings and other Sectors', 'Domestic Aviation', 'Domestic Navigation', 'Road Transportation', 'Railways', 'Other Transportation'],
-    'Chemical and Manufacturing Industries': ['Chemical Industry', 'Industrial Processes and Product Use', 'Manufacturing Industries and Construction', 'Mineral Industry', 'Non-energy Products from Fuels and Solvent Use', 'Electronics Industry'],
-    'Energy': ['Energy', 'Energy Industries', 'Fugitive Emissions from Fuels'],
-    'Waste': ['Waste'],
-    'Other': ['Other', 'Other Product Manufacture and Use', 'Other (Not specified elsewhere)'],
-    'Metal Industry': ['Metal Industry']
-}
+# List of countries to focus on
+countries_of_interest_bottom = [
+    'Macao', 'Iceland', 'Cyprus', 'Luxembourg', 'Latvia',
+    'Estonia, Rep. of', 'El Salvador', 'Costa Rica', 'Papua New Guinea'
+]
 
-# Function to map industries to categories
-def map_industry_to_category(industry):
-    for category, industries in industry_categories.items():
-        if industry in industries:
-            return category
-    return 'Uncategorized'
+# Filter the DataFrame to include only the selected countries
+df_filtered = df[df['Country'].isin(countries_of_interest_bottom)]
 
-# Add a new column 'Category' to the DataFrame
-df['Industry_Category'] = df['Industry'].apply(map_industry_to_category)
+# Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Gas_Type', etc.)
+columns_of_interest = ['Country', 'F2021', 'Gas_Type']
+df_selected = df_filtered[columns_of_interest]
 
-# Print the updated DataFrame with the new 'Category' column
-print(df)
+# Group by Country and Gas_Type, summing up emissions for each combination
+df_grouped = df_selected.groupby(['Country', 'Gas_Type'])['F2021'].sum().reset_index()
 
+# Set the plot size
+plt.figure(figsize=(14, 8))
+
+# Use seaborn to create a bar plot
+sns.barplot(x='Country', y='F2021', hue='Gas_Type', data=df_grouped, palette="tab10")
+
+# Add labels and title
+plt.title('Emissions by Gas Type in 2021 for Each Country (Bottom 10%)')
+plt.xlabel('Country')
+plt.ylabel('Total Emissions')
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+
+# Show legend
+plt.legend(title='Gas_Type', bbox_to_anchor=(1, 1))
+
+# Show the plot
+plt.show()
+
+
+# %%
+df['Gas_Type'].unique()
 # %%
