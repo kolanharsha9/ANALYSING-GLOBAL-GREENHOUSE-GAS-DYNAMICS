@@ -128,6 +128,8 @@ plt.show()
 
 
 
+
+
 # %%
 
 import pandas as pd
@@ -240,7 +242,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
-
+from sklearn.metrics import mean_squared_error, r2_score
 # Assuming your data is stored in a DataFrame named df
 # Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
 # df = pd.read_csv('your_data.csv')
@@ -275,7 +277,8 @@ print(y_pred)
 # Evaluate the model's performance (e.g., using Mean Squared Error)
 mse = mean_squared_error(y_test, y_pred)
 print(f'Mean Squared Error: {mse}')
-
+r2 = r2_score(y_test, y_pred)
+print(f'R-squared value: {r2}')
 # Access coefficients to understand the impact of each feature
 coefficients = pd.DataFrame({'Feature': X.columns, 'Coefficient': model.coef_})
 print(coefficients)
@@ -354,11 +357,6 @@ if p_value < 0.05:
     print("There is a significant difference in the distribution of industries between the top and bottom groups.")
 else:
     print("There is no significant difference in the distribution of industries between the top and bottom groups.")
-
-
-# %%
-
-
 
 
 # %%
@@ -537,3 +535,96 @@ plt.show()
 # %%
 df['Gas_Type'].unique()
 # %%
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+
+# Assuming df is your DataFrame with the columns mentioned
+
+# Get unique countries and industries
+countries_to_predict = df['Country'].unique()
+industries_to_predict = df['Industry_Category'].unique()
+
+# Set the forecast steps
+forecast_steps = 10
+
+# Create an empty DataFrame to store predictions
+predictions_df = pd.DataFrame(columns=['Country', 'Industry_Category', 'Year', 'Predicted_Emissions'])
+
+# Loop through combinations of countries and industries
+for country in countries_to_predict:
+    for industry in industries_to_predict:
+        # Filter the DataFrame for the selected country and industry
+        df_selected = df[(df['Country'] == country) & (df['Industry_Category'] == industry)]
+
+        # Extract the time variable and emissions
+        time_variable = np.arange(1970, 2022)
+        emissions = df_selected['F2021'].values
+
+        # Fit ARIMA model
+        model = ARIMA(emissions, order=(1, 1, 1))  # You can adjust the order based on ACF/PACF analysis
+        results = model.fit()
+
+        # Make predictions
+        forecast = results.get_forecast(steps=forecast_steps)
+        forecast_mean = forecast.predicted_mean
+
+        predictions_df = pd.concat([predictions_df, pd.DataFrame({
+            'Country': [country] * forecast_steps,
+            'Industry': [industry] * forecast_steps,
+            'Year': np.arange(2022, 2022 + forecast_steps),
+            'Predicted_Emissions': forecast_mean
+        })], ignore_index=True)
+
+# Display the predictions DataFrame
+print(predictions_df)
+# %%
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+import matplotlib.pyplot as plt
+
+
+
+# List of countries of interest
+countries_of_interest_top = [
+    'China, P.R.: Mainland', 'United States', 'India', 'Russian Federation',
+    'Japan', 'Indonesia', 'Iran, Islamic Rep. of', 'Brazil', 'Saudi Arabia'
+]
+
+# Initialize an array to accumulate forecasted mean emissions for each country
+all_forecasts = np.zeros((len(countries_of_interest_top), 10))
+
+# Iterate over the countries
+for idx, selected_country in enumerate(countries_of_interest_top):
+    # Filter the DataFrame for the selected country
+    df_selected = df[df['Country'] == selected_country]
+
+    # Extract the time variable and emissions
+    time_variable = np.arange(2022, 2032)
+    mean_emissions = np.mean(df_selected[['F2016', 'F2017', 'F2018', 'F2019', 'F2020', 'F2021']].values, axis=0)
+
+    # Fit ARIMA model
+    model = ARIMA(mean_emissions, order=(1, 1, 1))  # You can adjust the order based on ACF/PACF analysis
+    results = model.fit()
+
+    # Make predictions
+    forecast_steps = 10  # Adjust as needed
+    forecast = results.get_forecast(steps=forecast_steps)
+    forecast_mean = forecast.predicted_mean
+
+    # Accumulate forecasted mean emissions
+    all_forecasts[idx, :] = forecast_mean
+
+# Plotting
+plt.figure(figsize=(10, 6))
+for idx, selected_country in enumerate(countries_of_interest_top):
+    plt.plot(time_variable, all_forecasts[idx, :], label=f'{selected_country}', marker='o')
+
+plt.title('ARIMA Model Forecast for Mean Emissions')
+plt.xlabel('Year')
+plt.ylabel('Mean Emissions')
+plt.legend(loc='best')
+plt.show()
+
+
