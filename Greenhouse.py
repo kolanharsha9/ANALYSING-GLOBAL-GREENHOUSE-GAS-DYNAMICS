@@ -186,9 +186,9 @@ plt.title('GHG Emissions from 2016 to 2021 - Top Ten Economy Countries')
 plt.xlabel('Year')
 plt.ylabel('GHG Emissions (Million metric tons)')
 plt.legend(title='Country', bbox_to_anchor=(1, 1))
-
-
 plt.show()
+
+
 # %%
 # Select relevant columns for analysis
 columns_of_interest = ['Industry_Category', 'Gas_Type', 'F2021','F2016','F2017','F2018','F2019','F2020']
@@ -221,9 +221,9 @@ print(f'R-squared value: {r2}')
 
 coefficients = pd.DataFrame({'Feature': X.columns, 'Coefficient': model.coef_})
 print(coefficients)
+
+
 # %%
-
-
 # List of countries of interest
 countries_of_interest_top = [
     'China, P.R.: Mainland', 'United States', 'India', 'Russian Federation',
@@ -264,6 +264,7 @@ plt.xlabel('Year')
 plt.ylabel('Mean Emissions')
 plt.legend( bbox_to_anchor=(1, 1))
 plt.show()
+
 # %%
 '''
 Smart Question 3:
@@ -302,6 +303,7 @@ plt.xlabel('Year')
 plt.ylabel('Methane Emissions (Million metric tons)')
 plt.legend(title='Country', bbox_to_anchor=(1, 1))
 plt.show()
+
 # %%
 '''
 Smart Question 4:
@@ -420,6 +422,7 @@ plt.ylabel('Total Emissions')
 plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
 plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
 plt.show()
+
 # %%
 # List of countries to focus on
 countries_of_interest_bottom = [
@@ -446,6 +449,7 @@ plt.ylabel('Total Emissions')
 plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
 plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
 plt.show()
+
 # %%
 # List of countries to focus on
 countries_of_interest_top = [
@@ -474,7 +478,6 @@ plt.legend(title='Gas_Type', bbox_to_anchor=(1, 1))
 plt.show()
 
 # %%
-
 # List of countries to focus on
 countries_of_interest_bottom = [
     'Macao', 'Iceland', 'Cyprus', 'Luxembourg', 'Latvia',
