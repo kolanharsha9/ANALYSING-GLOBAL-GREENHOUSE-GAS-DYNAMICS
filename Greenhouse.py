@@ -10,30 +10,33 @@ from sklearn.metrics import mean_squared_error, r2_score
 import statsmodels.api as sm
 from scipy.stats import ttest_ind
 from statsmodels.tsa.arima.model import ARIMA
+
 #%%
 data=pd.read_csv("dataset.csv")
 data
+
 #%%
 data.columns
+
 #%%
 data.info
+
 #%%
 percent_missing = data.isnull().sum() * 100 / len(data)
 missing_value_df = pd.DataFrame({'column_name': data.columns,
                                  'percent_missing': percent_missing})
+
 #%%
 missing_value_df.columns
+
 #%%
-
-
 plt.figure(figsize=(12, 5))
-
 plt.xticks(fontsize=6)
-
 plt.xticks(rotation=90)
 sns.barplot(x='column_name',y='percent_missing',data=missing_value_df)
 plt.title('Percent of missing values by Column')
 plt.show()
+
 #%%
 cols = ['F2022', 'F2023', 'F2024', 'F2025', 'F2026', 'F2027', 'F2028', 'F2029', 'F2030']
 data = data.drop(cols, axis=1)
@@ -392,3 +395,113 @@ if p_value < 0.05:
 else:
     print("There is no significant difference in the distribution of gas types between the top and bottom groups.")
 
+# %%
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# List of countries to focus on
+countries_of_interest_top = [
+    'China, P.R.: Mainland', 'United States', 'India', 'Russian Federation',
+    'Japan', 'Indonesia', 'Iran, Islamic Rep. of', 'Brazil', 'Saudi Arabia'
+]
+
+# Filter the DataFrame to include only the selected countries
+df_filtered = df[df['Country'].isin(countries_of_interest_top)]
+
+# Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Industry', etc.)
+columns_of_interest = ['Country', 'F2021', 'Industry_Category']
+df_selected = df_filtered[columns_of_interest]
+
+# Group by Country and Industry, summing up emissions for each combination
+df_grouped = df_selected.groupby(['Country', 'Industry_Category'])['F2021'].sum().reset_index()
+
+
+plt.figure(figsize=(14, 8))
+sns.barplot(x='Country', y='F2021', hue='Industry_Category', data=df_grouped, palette="tab10")
+plt.title('Emissions by Industry in 2021 for Each Country')
+plt.xlabel('Country')
+plt.ylabel('Total Emissions')
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
+plt.show()
+
+# %%
+# List of countries to focus on
+countries_of_interest_bottom = [
+    'Macao', 'Iceland', 'Cyprus', 'Luxembourg', 'Latvia',
+       'Estonia, Rep. of', 'El Salvador', 'Costa Rica', 'Papua New Guinea'
+]
+
+# Filter the DataFrame to include only the selected countries
+df_filtered = df[df['Country'].isin(countries_of_interest_bottom)]
+
+# Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Industry', etc.)
+columns_of_interest = ['Country', 'F2021', 'Industry_Category']
+df_selected = df_filtered[columns_of_interest]
+
+# Group by Country and Industry, summing up emissions for each combination
+df_grouped = df_selected.groupby(['Country', 'Industry_Category'])['F2021'].sum().reset_index()
+
+
+plt.figure(figsize=(14, 8))
+sns.barplot(x='Country', y='F2021', hue='Industry_Category', data=df_grouped, palette="tab10")
+plt.title('Emissions by Industry in 2021 for Each Country')
+plt.xlabel('Country')
+plt.ylabel('Total Emissions')
+plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
+plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
+plt.show()
+
+# %%
+# List of countries to focus on
+countries_of_interest_top = [
+    'China, P.R.: Mainland', 'United States', 'India', 'Russian Federation',
+    'Japan', 'Indonesia', 'Iran, Islamic Rep. of', 'Brazil', 'Saudi Arabia'
+]
+
+# Filter the DataFrame to include only the selected countries
+df_filtered = df[df['Country'].isin(countries_of_interest_top)]
+
+# Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Gas_Type', etc.)
+columns_of_interest = ['Country', 'F2021', 'Gas_Type']
+df_selected = df_filtered[columns_of_interest]
+
+# Group by Country and Gas_Type, summing up emissions for each combination
+df_grouped = df_selected.groupby(['Country', 'Gas_Type'])['F2021'].sum().reset_index()
+
+
+plt.figure(figsize=(14, 8))
+sns.barplot(x='Country', y='F2021', hue='Gas_Type', data=df_grouped, palette="tab10")
+plt.title('Emissions by Gas Type in 2021 for Each Country')
+plt.xlabel('Country')
+plt.ylabel('Total Emissions')
+plt.xticks(rotation=45, ha='right')  
+plt.legend(title='Gas_Type', bbox_to_anchor=(1, 1))
+plt.show()
+
+# %%
+# List of countries to focus on
+countries_of_interest_bottom = [
+    'Macao', 'Iceland', 'Cyprus', 'Luxembourg', 'Latvia',
+    'Estonia, Rep. of', 'El Salvador', 'Costa Rica', 'Papua New Guinea'
+]
+
+# Filter the DataFrame to include only the selected countries
+df_filtered = df[df['Country'].isin(countries_of_interest_bottom)]
+
+# Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Gas_Type', etc.)
+columns_of_interest = ['Country', 'F2021', 'Gas_Type']
+df_selected = df_filtered[columns_of_interest]
+
+# Group by Country and Gas_Type, summing up emissions for each combination
+df_grouped = df_selected.groupby(['Country', 'Gas_Type'])['F2021'].sum().reset_index()
+
+plt.figure(figsize=(14, 8))
+sns.barplot(x='Country', y='F2021', hue='Gas_Type', data=df_grouped, palette="tab10")
+plt.title('Emissions by Gas Type in 2021 for Each Country (Bottom 10%)')
+plt.xlabel('Country')
+plt.ylabel('Total Emissions')
+plt.xticks(rotation=45, ha='right')  
+plt.legend(title='Gas_Type', bbox_to_anchor=(1, 1))
+plt.show()
