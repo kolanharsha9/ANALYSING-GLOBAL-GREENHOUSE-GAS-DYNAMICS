@@ -1,7 +1,16 @@
 #%%
+#Import all the required libraries
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
+import statsmodels.api as sm
+from scipy.stats import ttest_ind
+from statsmodels.tsa.arima.model import ARIMA
+#%%
 data=pd.read_csv("dataset.csv")
 data
 #%%
@@ -23,17 +32,16 @@ plt.xticks(fontsize=6)
 
 plt.xticks(rotation=90)
 sns.barplot(x='column_name',y='percent_missing',data=missing_value_df)
+plt.title('Percent of missing values by Column')
 plt.show()
 #%%
 cols = ['F2022', 'F2023', 'F2024', 'F2025', 'F2026', 'F2027', 'F2028', 'F2029', 'F2030']
 data = data.drop(cols, axis=1)
-#%%
-data.columns
+
 #%%
 data=data.dropna()
 data.info()
-# %%
-data.columns
+
 #%%
 cols = ['ISO2', 'CTS_Full_Descriptor', 'CTS_Code', 'F1986', 'F1987', 'F1988', 'F1989', 'F1990', 'F1991', 'F1992', 'F1993', 'F1994', 'F1995', 'F1996', 'F1997', 'F1998', 'F1999', 'F2000']
 data = data.drop(cols, axis=1)
@@ -67,9 +75,6 @@ df_filtered = data[data['Country'].isin(country_list)]
 data1=df_filtered
 data2 = data1[data1['Industry'] != 'Not Applicable']
 # %%
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
 
 industry_categories = {
     'Agriculture': ['Agriculture'],
@@ -91,7 +96,7 @@ def map_industry_to_category(industry):
 # Add a new column 'Category' to the DataFrame
 data2['Industry_Category'] = data2['Industry'].apply(map_industry_to_category)
 
-# Print the updated DataFrame with the new 'Category' column
+
 print(data2)
 #%%
 data2.to_csv('data.csv', index=False)
@@ -102,9 +107,11 @@ df=pd.read_csv('data.csv')
 # %%
 len(df['Country'].unique())
 # %%
-import matplotlib.pyplot as plt
-import seaborn as sns
-
+'''
+Smart Question 1:
+Which industries contribute the most to greenhouse gas (GHG) emissions, in the dataset. 
+Which gas type is emitted most in every Industry?
+'''
 # List of columns representing years
 year_columns = [f'F{year}' for year in range(2016, 2022)]
 
@@ -114,14 +121,14 @@ total_emissions_by_industry = df.groupby('Industry_Category')[year_columns].sum(
 # Sorting industries by their total emissions
 sorted_emissions = total_emissions_by_industry.sort_values(ascending=False)
 
-# Plotting the results
+
 plt.figure(figsize=(12, 8))
 sns.barplot(x=sorted_emissions.index, y=sorted_emissions.values)
 plt.title('Total GHG Emissions by Industry (2016-2021)')
 plt.xlabel('Total Emissions (Million Metric Tons of CO2 Equivalent)')
 plt.ylabel('Industry')
 
-# Adjusting the position of the x-axis and y-axis labels
+
 plt.xlabel('Total Emissions (Million Metric Tons of CO2 Equivalent)', labelpad=20)
 plt.ylabel('Industry', labelpad=20)
 plt.xticks(rotation=45, ha='right')
@@ -130,18 +137,13 @@ plt.show()
 
 
 # %%
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Assuming df is your DataFrame with the specified columns
-
 # Filter the DataFrame to include only rows with emissions data
 emissions_df = df[df.iloc[:, 11:].notnull().any(axis=1)]
 
 # Count occurrences of each (Industry, Gas_Type) combination
 industry_gas_counts = emissions_df.groupby(['Industry_Category', 'Gas_Type']).size().reset_index(name='Count')
 
-# Plotting
+
 plt.figure(figsize=(14, 8))
 sns.barplot(x='Industry_Category', y='Count', hue='Gas_Type', data=industry_gas_counts)
 plt.title('Gas Types by Industry')
@@ -157,13 +159,10 @@ plt.show()
 
 # %%
 
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
-
+'''
+Smart Question 2:
+What has been the pattern of GHG emissions from 2016 to 2021 for top 10 economy countries and which country has shown the greatest deviation from this trend?
+'''
 # List of top ten economy countries
 top_ten_economy = [
     'United States', 'China, P.R.: Mainland', 'Japan', 'Germany', 'India',
@@ -180,7 +179,7 @@ df_selected = df_top_ten[columns_of_interest]
 # Group by 'Country' and calculate the mean emissions for each year
 df_mean = df_selected.groupby('Country').mean()
 
-# Plot the mean GHG emissions for each country from 2016 to 2021
+
 plt.figure(figsize=(12, 8))
 df_mean.T.plot(kind='line', marker='o')
 plt.title('GHG Emissions from 2016 to 2021 - Top Ten Economy Countries')
@@ -188,19 +187,9 @@ plt.xlabel('Year')
 plt.ylabel('GHG Emissions (Million metric tons)')
 plt.legend(title='Country', bbox_to_anchor=(1, 1))
 
-# Show the plot
+
 plt.show()
 # %%
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import mean_squared_error, r2_score
-import statsmodels.api as sm
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
-
 # Select relevant columns for analysis
 columns_of_interest = ['Industry_Category', 'Gas_Type', 'F2021','F2016','F2017','F2018','F2019','F2020']
 df_selected = df[columns_of_interest].copy()
@@ -218,30 +207,21 @@ df_encoded = pd.get_dummies(df_selected, columns=['Industry_Category', 'Gas_Type
 X = df_encoded.drop('F2021', axis=1)  # Independent variables
 y = df_encoded['F2021']  # Dependent variable
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Initialize the model
 model = LinearRegression()
-
-# Train the model on the training data
 model.fit(X_train, y_train)
 
-# Make predictions on the testing set
 y_pred = model.predict(X_test)
 print(y_pred)
-# Evaluate the model's performance (e.g., using Mean Squared Error)
+
 mse = mean_squared_error(y_test, y_pred)
 print(f'Mean Squared Error: {mse}')
+
 r2 = r2_score(y_test, y_pred)
 print(f'R-squared value: {r2}')
-# Access coefficients to understand the impact of each feature
+
 coefficients = pd.DataFrame({'Feature': X.columns, 'Coefficient': model.coef_})
 print(coefficients)
 # %%
-import pandas as pd
-import numpy as np
-from statsmodels.tsa.arima.model import ARIMA
-import matplotlib.pyplot as plt
-
 
 
 # List of countries of interest
@@ -274,7 +254,7 @@ for idx, selected_country in enumerate(countries_of_interest_top):
     # Accumulate forecasted mean emissions
     all_forecasts[idx, :] = forecast_mean
 print(results.summary())
-# Plotting
+
 plt.figure(figsize=(10, 6))
 for idx, selected_country in enumerate(countries_of_interest_top):
     plt.plot(time_variable, all_forecasts[idx, :], label=f'{selected_country}', marker='o')
@@ -284,21 +264,11 @@ plt.xlabel('Year')
 plt.ylabel('Mean Emissions')
 plt.legend( bbox_to_anchor=(1, 1))
 plt.show()
-
-
-
-
-
-
-
 # %%
-import pandas as pd
-import matplotlib.pyplot as plt
-
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
-
+'''
+Smart Question 3:
+Among all the countries examined in the dataset, which ones have achieved a reduction in methane emissions between 2016 and 2021 indicating efforts in mitigation? 
+'''
 # List of top ten economy countries
 top_ten_economy = [
     'United States', 'China, P.R.: Mainland', 'Japan', 'Germany', 'India',
@@ -332,22 +302,11 @@ plt.xlabel('Year')
 plt.ylabel('Methane Emissions (Million metric tons)')
 plt.legend(title='Country', bbox_to_anchor=(1, 1))
 plt.show()
-
-
 # %%
-df.columns
-
-
-
-# %%
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
-
+'''
+Smart Question 4:
+In terms of emissions, how do the top 10% highest emitting countries, in 2021, compare to the bottom 10% and what factors could explain this discrepancy?
+'''
 # Select relevant columns for analysis (e.g., 'Country', 'F2021', 'Industry', 'Gas_Type', etc.)
 columns_of_interest = ['Country', 'F2021', 'Industry', 'Gas_Type']
 df_selected = df[columns_of_interest]
@@ -384,8 +343,6 @@ print(bottom_10_percent.index)
 
 
 # %%
-from scipy.stats import ttest_ind
-
 # Example: Compare emissions in 2021 between top and bottom groups
 top_group_data = df_selected[df_selected['Country'].isin(top_10_percent.index)]['F2021']
 bottom_group_data = df_selected[df_selected['Country'].isin(bottom_10_percent.index)]['F2021']
@@ -393,7 +350,7 @@ bottom_group_data = df_selected[df_selected['Country'].isin(bottom_10_percent.in
 # Perform independent t-test
 t_stat, p_value = ttest_ind(top_group_data, bottom_group_data)
 print(p_value)
-# Analyze results
+
 if p_value < 0.05:
     print("There is a significant difference between the top and bottom groups.")
 else:
@@ -410,7 +367,7 @@ bottom_group_data = df_selected[df_selected['Country'].isin(bottom_10_percent.in
 ks_stat, p_value = ks_2samp(top_group_data, bottom_group_data)
 print(p_value)
 
-# Analyze results
+
 if p_value < 0.05:
     print("There is a significant difference in the distribution of industries between the top and bottom groups.")
 else:
@@ -427,22 +384,16 @@ bottom_group_data = df_selected[df_selected['Country'].isin(bottom_10_percent.in
 ks_stat, p_value = ks_2samp(top_group_data, bottom_group_data)
 print(p_value)
 
-# Analyze results
+
 if p_value < 0.05:
     print("There is a significant difference in the distribution of gas types between the top and bottom groups.")
 else:
     print("There is no significant difference in the distribution of gas types between the top and bottom groups.")
 
 # %%
-df.columns
-# %%
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
 
 # List of countries to focus on
 countries_of_interest_top = [
@@ -460,32 +411,16 @@ df_selected = df_filtered[columns_of_interest]
 # Group by Country and Industry, summing up emissions for each combination
 df_grouped = df_selected.groupby(['Country', 'Industry_Category'])['F2021'].sum().reset_index()
 
-# Set the plot size
+
 plt.figure(figsize=(14, 8))
-
-# Use seaborn to create a bar plot
 sns.barplot(x='Country', y='F2021', hue='Industry_Category', data=df_grouped, palette="tab10")
-
-# Add labels and title
 plt.title('Emissions by Industry in 2021 for Each Country')
 plt.xlabel('Country')
 plt.ylabel('Total Emissions')
 plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
-
-# Show legend
 plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
-
-# Show the plot
 plt.show()
 # %%
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
-
 # List of countries to focus on
 countries_of_interest_bottom = [
     'Macao', 'Iceland', 'Cyprus', 'Luxembourg', 'Latvia',
@@ -502,32 +437,16 @@ df_selected = df_filtered[columns_of_interest]
 # Group by Country and Industry, summing up emissions for each combination
 df_grouped = df_selected.groupby(['Country', 'Industry_Category'])['F2021'].sum().reset_index()
 
-# Set the plot size
+
 plt.figure(figsize=(14, 8))
-
-# Use seaborn to create a bar plot
 sns.barplot(x='Country', y='F2021', hue='Industry_Category', data=df_grouped, palette="tab10")
-
-# Add labels and title
 plt.title('Emissions by Industry in 2021 for Each Country')
 plt.xlabel('Country')
 plt.ylabel('Total Emissions')
 plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
-
-# Show legend
 plt.legend(title='Industry_Category', bbox_to_anchor=(1, 1))
-
-# Show the plot
 plt.show()
 # %%
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
-
 # List of countries to focus on
 countries_of_interest_top = [
     'China, P.R.: Mainland', 'United States', 'India', 'Russian Federation',
@@ -544,32 +463,17 @@ df_selected = df_filtered[columns_of_interest]
 # Group by Country and Gas_Type, summing up emissions for each combination
 df_grouped = df_selected.groupby(['Country', 'Gas_Type'])['F2021'].sum().reset_index()
 
-# Set the plot size
+
 plt.figure(figsize=(14, 8))
-
-# Use seaborn to create a bar plot
 sns.barplot(x='Country', y='F2021', hue='Gas_Type', data=df_grouped, palette="tab10")
-
-# Add labels and title
 plt.title('Emissions by Gas Type in 2021 for Each Country')
 plt.xlabel('Country')
 plt.ylabel('Total Emissions')
-plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
-
-# Show legend
+plt.xticks(rotation=45, ha='right')  
 plt.legend(title='Gas_Type', bbox_to_anchor=(1, 1))
-
-# Show the plot
 plt.show()
 
 # %%
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-# Assuming your data is stored in a DataFrame named df
-# Replace 'your_data.csv' with the actual path or URL to your CSV file if needed
-# df = pd.read_csv('your_data.csv')
 
 # List of countries to focus on
 countries_of_interest_bottom = [
@@ -587,30 +491,11 @@ df_selected = df_filtered[columns_of_interest]
 # Group by Country and Gas_Type, summing up emissions for each combination
 df_grouped = df_selected.groupby(['Country', 'Gas_Type'])['F2021'].sum().reset_index()
 
-# Set the plot size
 plt.figure(figsize=(14, 8))
-
-# Use seaborn to create a bar plot
 sns.barplot(x='Country', y='F2021', hue='Gas_Type', data=df_grouped, palette="tab10")
-
-# Add labels and title
 plt.title('Emissions by Gas Type in 2021 for Each Country (Bottom 10%)')
 plt.xlabel('Country')
 plt.ylabel('Total Emissions')
-plt.xticks(rotation=45, ha='right')  # Rotate x-axis labels for better readability
-
-# Show legend
+plt.xticks(rotation=45, ha='right')  
 plt.legend(title='Gas_Type', bbox_to_anchor=(1, 1))
-
-# Show the plot
 plt.show()
-
-
-# %%
-df['Gas_Type'].unique()
-
-
-
-
-
-# %%
